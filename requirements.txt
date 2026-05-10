@@ -1,0 +1,14 @@
+fastapi
+uvicorn
+requests
+python-dotenv
+scikit-learn
+xgboost
+joblib
+numpy
+pandas
+rasterio
+geopandas
+firebase-admin
+httpx
+pytest

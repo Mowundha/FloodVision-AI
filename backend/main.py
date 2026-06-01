@@ -7,8 +7,8 @@ from fastapi.responses import JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
-from routers import predict, streets, reports
-from utils.security import limiter, get_security_headers
+from backend.routers import predict, streets, reports
+from backend.utils.security import limiter, get_security_headers
 
 # ── Create app ────────────────────────────────────────────────
 app = FastAPI(

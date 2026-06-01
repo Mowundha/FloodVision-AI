@@ -20,7 +20,7 @@ load_dotenv()
 # ── API Keys ──────────────────────────────────────────────────
 OPENWEATHER_KEY  = os.getenv("OPENWEATHER_API_KEY", "")
 FIREBASE_CRED    = os.getenv("FIREBASE_CRED",
-                             "firebase-service-account.json")
+                             "backend/firebase-service-account.json")
 
 if not OPENWEATHER_KEY:
     print("WARNING: OPENWEATHER_API_KEY not set in .env")

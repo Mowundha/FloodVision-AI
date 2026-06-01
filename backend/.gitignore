@@ -1,0 +1,27 @@
+# .gitignore
+# Files that must NEVER go to GitHub
+
+# Secret keys
+.env
+backend/firebase-service-account.json
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+venv/
+.venv/
+env/
+
+# VS Code
+.vscode/
+
+# Mac
+.DS_Store
+
+# Model files (large — regenerate from training data)
+backend/models/*.pkl
+
+# Data files (large)
+backend/data/*.tif
+backend/data/*.csv

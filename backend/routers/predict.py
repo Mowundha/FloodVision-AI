@@ -1,7 +1,7 @@
 # backend/routers/predict.py
 #
 # WHAT THIS FILE DOES:
-#   Defines POST /predict and POST /notify endpoints
+#   Defines POST /predict and POST /notify endpoints with rate limiting
 #
 # HOW /predict WORKS:
 #   1. Receive lat/lon from user
@@ -14,7 +14,7 @@
 #   8. Find safer nearby streets
 #   9. Return full prediction JSON
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 import math
 
@@ -24,13 +24,12 @@ from utils.tide       import compute_tide_height, find_nearest_coastal_station
 from utils.elevation  import get_elevation_from_dem
 from utils.flood_score import predict_flood_risk
 
+# ── Import security settings and rate limiting controls ───────
+from backend.utils.security import limiter, RATE_PREDICT, RATE_NOTIFY
+
 router = APIRouter()
 
 # ── Tamil Nadu streets database ───────────────────────────────
-# This is your street-level data for all of Tamil Nadu
-# Each street has: lat, lon, area, typical surface type,
-#                  catchment area, drain capacity
-
 TN_STREETS = {
     # ── Chennai ──────────────────────────────────────────────
     "Velachery Main Road": {
@@ -152,7 +151,8 @@ class NotifyInput(BaseModel):
 
 # ── POST /predict ─────────────────────────────────────────────
 @router.post("/predict")
-def predict(location: LocationInput):
+@limiter.limit(RATE_PREDICT)
+def predict(request: Request, location: LocationInput):
     """
     MAIN ENDPOINT.
     Send: { "latitude": 13.08, "longitude": 80.27 }
@@ -305,8 +305,9 @@ def predict(location: LocationInput):
 
 # ── POST /notify ──────────────────────────────────────────────
 @router.post("/notify")
-def send_notification(data: NotifyInput):
-    """Sends a push notification to the user's phone."""
+@limiter.limit(RATE_NOTIFY)
+def send_notification(request: Request, data: NotifyInput):
+    """Sends a push notification to the user's phone with rate limiting."""
     try:
         from utils.notifications import send_flood_alert
         result = send_flood_alert(data.fcm_token, data.risk, data.street)

@@ -1,0 +1,19 @@
+# render.yaml
+# This file tells Render how to deploy your FastAPI backend
+# Place this in the ROOT floodvision-ai/ folder (not inside backend/)
+
+services:
+  - type: web
+    name: floodvision-ai-backend
+    runtime: python
+    region: singapore    # closest region to Tamil Nadu
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
+      - key: OPENWEATHER_API_KEY
+        sync: false        # you will set this manually in Render dashboard
+      - key: FIREBASE_CRED
+        sync: false        # you will set this manually in Render dashboard

@@ -18,7 +18,7 @@ from datetime import datetime, timezone
 import math
 
 from config import db
-from utils.firebase_auth import verify_token, verify_token_optional
+from backend.utils.firebase_auth import verify_token, verify_token_optional
 
 # ── Import security settings and rate limiting controls ───────
 from backend.utils.security import limiter, sanitize_text, sanitize_street_name, RATE_REPORT

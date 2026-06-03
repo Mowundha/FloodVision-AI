@@ -1,58 +1,63 @@
-# backend/config.py
-#
-# WHAT THIS DOES:
-#   - Loads all secret keys from .env
-#   - Initializes Firebase app ONCE (used by both auth + firestore)
-#   - Every other file imports from here
-#
-# WHY INITIALIZE FIREBASE HERE:
-#   Firebase can only be initialized once in the entire Python process.
-#   If two files both try to initialize it, you get an error.
-#   So we do it here once, and every other file just imports the result.
+# backend/config.py — updated to handle Render deployment
+# The firebase JSON can be stored as a file OR as an environment variable string
 
 import os
+import json
+import tempfile
 import firebase_admin
 from firebase_admin import credentials, firestore
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# ── API Keys ──────────────────────────────────────────────────
-OPENWEATHER_KEY  = os.getenv("OPENWEATHER_API_KEY", "")
-FIREBASE_CRED    = os.getenv("FIREBASE_CRED",
-                             "backend/firebase-service-account.json")
-
+OPENWEATHER_KEY = os.getenv("OPENWEATHER_API_KEY", "")
 if not OPENWEATHER_KEY:
-    print("WARNING: OPENWEATHER_API_KEY not set in .env")
+    print("WARNING: OPENWEATHER_API_KEY not set")
 
-# ── Initialize Firebase (only once) ──────────────────────────
-# This single initialization is shared by:
-#   - firebase_auth.py  (verifying user tokens)
-#   - notifications.py  (sending push alerts)
-#   - reports.py        (saving to Firestore)
+# ── Firebase initialization ───────────────────────────────────
+# Supports two modes:
+#   1. Local development: reads firebase-service-account.json file
+#   2. Render deployment: reads FIREBASE_CRED_JSON env variable (JSON string)
+
+def _get_firebase_credentials():
+    """
+    Gets Firebase credentials whether running locally or on Render.
+
+    Locally: uses the JSON file path in FIREBASE_CRED
+    On Render: uses the JSON content in FIREBASE_CRED_JSON env variable
+    """
+    # Mode 1: JSON content stored as environment variable (Render)
+    cred_json_str = os.getenv("FIREBASE_CRED_JSON", "")
+    if cred_json_str:
+        try:
+            cred_dict = json.loads(cred_json_str)
+            return credentials.Certificate(cred_dict)
+        except json.JSONDecodeError as e:
+            print(f"ERROR: FIREBASE_CRED_JSON is not valid JSON: {e}")
+
+    # Mode 2: JSON file path (local development)
+    cred_path = os.getenv("FIREBASE_CRED", "firebase-service-account.json")
+    if os.path.exists(cred_path):
+        return credentials.Certificate(cred_path)
+
+    print("ERROR: No Firebase credentials found.")
+    print("  Local: set FIREBASE_CRED=path/to/firebase-service-account.json")
+    print("  Render: set FIREBASE_CRED_JSON=<entire JSON content>")
+    return None
+
 
 try:
     if not firebase_admin._apps:
-        cred = credentials.Certificate(FIREBASE_CRED)
-        firebase_admin.initialize_app(cred)
-        print("Firebase initialized successfully")
-    else:
-        print("Firebase already initialized")
-
-except FileNotFoundError:
-    print(f"ERROR: Firebase credential file not found at '{FIREBASE_CRED}'")
-    print("Make sure firebase-service-account.json is in the backend/ folder")
-
+        cred = _get_firebase_credentials()
+        if cred:
+            firebase_admin.initialize_app(cred)
+            print("Firebase initialized successfully")
 except Exception as e:
-    print(f"ERROR: Firebase initialization failed: {e}")
+    print(f"Firebase initialization failed: {e}")
 
-# ── Firestore database client ─────────────────────────────────
-# This is the object you use to read/write to Firestore
-# Import this in any file that needs the database:
-#   from config import db
 try:
     db = firestore.client()
-    print("Firestore connected successfully")
+    print("Firestore connected")
 except Exception as e:
     db = None
-    print(f"WARNING: Firestore connection failed: {e}")
+    print(f"Firestore connection failed: {e}")

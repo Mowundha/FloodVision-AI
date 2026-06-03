@@ -3,12 +3,12 @@
 # Frontend calls this to draw the coloured map overlay
 
 from fastapi import APIRouter
-from utils.rainfall    import get_current_rainfall
-from utils.river       import get_river_discharge, find_nearest_river, TN_RIVERS
-from utils.tide        import compute_tide_height, find_nearest_coastal_station
-from utils.elevation   import get_elevation_from_dem
-from utils.flood_score import predict_flood_risk
-from routers.predict   import TN_STREETS
+from backend.utils.rainfall    import get_current_rainfall
+from backend.utils.river       import get_river_discharge, find_nearest_river, TN_RIVERS
+from backend.utils.tide        import compute_tide_height, find_nearest_coastal_station
+from backend.utils.elevation   import get_elevation_from_dem
+from backend.utils.flood_score import predict_flood_risk
+from backend.routers.predict   import TN_STREETS
 
 router = APIRouter()
 

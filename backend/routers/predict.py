@@ -18,11 +18,11 @@ from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 import math
 
-from utils.rainfall   import get_current_rainfall, get_forecast_rainfall_3h
-from utils.river      import get_river_discharge, find_nearest_river, TN_RIVERS
-from utils.tide       import compute_tide_height, find_nearest_coastal_station
-from utils.elevation  import get_elevation_from_dem
-from utils.flood_score import predict_flood_risk
+from backend.utils.rainfall   import get_current_rainfall, get_forecast_rainfall_3h
+from backend.utils.river      import get_river_discharge, find_nearest_river, TN_RIVERS
+from backend.utils.tide       import compute_tide_height, find_nearest_coastal_station
+from backend.utils.elevation  import get_elevation_from_dem
+from backend.utils.flood_score import predict_flood_risk
 
 # ── Import security settings and rate limiting controls ───────
 from backend.utils.security import limiter, RATE_PREDICT, RATE_NOTIFY

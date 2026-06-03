@@ -17,7 +17,7 @@ from typing import Optional
 from datetime import datetime, timezone
 import math
 
-from config import db
+from backend.config import db
 from backend.utils.firebase_auth import verify_token, verify_token_optional
 
 # ── Import security settings and rate limiting controls ───────

@@ -207,6 +207,7 @@ def predict(request: Request, location: LocationInput):
         area_km2            = street["area_km2"],
         surface             = street["surface"]
     )
+    prediction["predicted_depth_cm"] = max(0.0, prediction["predicted_depth_cm"])
 
     # ── Step 7: Check nearby streets ─────────────────────────
     nearby = get_nearby_streets(street["name"])
@@ -249,6 +250,16 @@ def predict(request: Request, location: LocationInput):
                 "risk":   s_pred["risk"],
                 "depth_cm": s_pred["predicted_depth_cm"]
             }
+            s_pred["predicted_depth_cm"] = max(0.0, s_pred["predicted_depth_cm"])
+
+        nearby_risks.append({
+            "street":   s["name"],
+            "city":     s["city"],
+            "area":     s["area"],
+            "risk":     s_pred["risk"],
+            "color":    s_pred["color"],
+            "depth_cm": s_pred["predicted_depth_cm"]
+        })
 
     # ── Step 8: Build evacuation tip ─────────────────────────
     risk = prediction["risk"]
